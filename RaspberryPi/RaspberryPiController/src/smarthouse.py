@@ -1,10 +1,29 @@
 __author__ = 'Jordan'
 
-import RPi.GPIO as GPIO
+#import RPi.GPIO as GPIO
 import time
+import BaseHTTPServer
 
-LED_PIN = 4 #board pin 7
-BUTTON_PIN = 17 #board pin 9
+LED_PIN = 4         # board pin 7
+BUTTON_PIN = 17     # board pin 9
+
+HOST_NAME = 'localhost'
+POST_NUMBER = 8080
+
+class MyHandler(BaseHTTPServer.BaseHTTPRequestHandler):
+    def do_HEAD(self):
+        self.send_response(200)
+        self.send_header("Content-type","text/html")
+        self.end_headers()
+
+    def do_GET(self):
+        """Respond to a GET request."""
+        self.send_response(200)
+        self.send_header("Content-type","text/html")
+        self.end_headers()
+
+        self.wfile.write("<html><head><title>Hello</title></head><body>Hello Jordan</body></html>")
+
 
 def setup_gpio():
     GPIO.setmode(GPIO.BCM)
@@ -17,33 +36,32 @@ def setup_gpio():
 
 
 def turn_on_LED():
+    pass
     GPIO.output(LED_PIN, 1)
 
 
 def turn_off_LED():
     GPIO.output(LED_PIN, 0)
-    
+
 
 def main():
-    print("Setting up GPIO...")
-
     try:
-        setup_gpio()
+        print("Setting up HTTP server")
+        server_class = BaseHTTPServer.HTTPServer
+        httpd = server_class((HOST_NAME, POST_NUMBER), MyHandler)
 
-        for i in range(50):
-            time.sleep(1)
-            print("On")
-            turn_on_LED()
+        print("Setting up GPIO...")
+#        setup_gpio()
 
-            time.sleep(1)
-            print("Off")
-            turn_off_LED()
-
-            print("Button: {0}".format(GPIO.input(BUTTON_PIN)))
+        httpd.serve_forever()
             
     finally:
-        print("Done")
-        GPIO.cleanup()
+        if 'httpd' in locals():
+            print("Closing down HTTP daemon")
+            httpd.server_close()
+
+        print("Cleaning up GPIO...")
+#        GPIO.cleanup()
         
 
 if __name__ == '__main__':
