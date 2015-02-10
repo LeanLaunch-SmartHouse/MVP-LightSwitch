@@ -1,13 +1,14 @@
 __author__ = 'Jordan'
 
-#import RPi.GPIO as GPIO
+import RPi.GPIO as GPIO
 import time
-import BaseHTTPServer
+
+import http.server as http
 
 LED_PIN = 4         # board pin 7
 BUTTON_PIN = 17     # board pin 9
 
-HOST_NAME = 'localhost'
+HOST_NAME = ''
 POST_NUMBER = 8080
 
 class MyHandler(BaseHTTPServer.BaseHTTPRequestHandler):
@@ -51,8 +52,9 @@ def main():
         httpd = server_class((HOST_NAME, POST_NUMBER), MyHandler)
 
         print("Setting up GPIO...")
-#        setup_gpio()
+        setup_gpio()
 
+        print("Serving HTTP...")
         httpd.serve_forever()
             
     finally:
@@ -61,7 +63,7 @@ def main():
             httpd.server_close()
 
         print("Cleaning up GPIO...")
-#        GPIO.cleanup()
+        GPIO.cleanup()
         
 
 if __name__ == '__main__':
